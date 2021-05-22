@@ -1,4 +1,4 @@
-# bvl_proy
+# Bolsa de Valores del PERU
 
 
 ## Configuración
@@ -14,6 +14,7 @@ envDatax                 d:\users\jvicenth\.conda\envs\envDatax
 - conda activate envPy38
 
 - pip install -r requirement.txt
+- pip install -U requirement.txt
 
 ## Obtener la lista de codigos de la BVL
 
