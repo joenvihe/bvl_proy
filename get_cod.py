@@ -203,36 +203,40 @@ if __name__ == "__main__":
         list_values = get_stock_list_values(nemonico, startDate, endDate)
         str_values = ""
         for val in list_values:
-            if "id" not in val:
-                val["id"] = ""
-            if "nemonico" not in val:
-                val["nemonico"] = ""
-            if "date" not in val:
-                val["date"] = ""
-            if "open" not in val:
-                val["open"] = ""
-            if "close" not in val:
-                val["close"] = "" 
-            if "high" not in val:
-                val["high"] = ""
-            if "low" not in val:
-                val["low"] = ""
-            if "average" not in val:
-                val["average"] = ""
-            if "quantityNegotiated" not in val:
-                val["quantityNegotiated"] = ""
-            if "solAmountNegotiated" not in val:
-                val["solAmountNegotiated"] = ""
-            if "dollarAmountNegotiated" not in val:
-                val["dollarAmountNegotiated"]
-            if "yesterday" not in val:
-                val["yesterday"] = ""
-            if "yesterdayClose" not in val:
-                val["yesterdayClose"] = "" 
-            if "currencySymbol" not in val:
-                val["currencySymbol"]
+            try:
+                if "id" not in val:
+                    val["id"] = ""
+                if "nemonico" not in val:
+                    val["nemonico"] = ""
+                if "date" not in val:
+                    val["date"] = ""
+                if "open" not in val:
+                    val["open"] = ""
+                if "close" not in val:
+                    val["close"] = "" 
+                if "high" not in val:
+                    val["high"] = ""
+                if "low" not in val:
+                    val["low"] = ""
+                if "average" not in val:
+                    val["average"] = ""
+                if "quantityNegotiated" not in val:
+                    val["quantityNegotiated"] = ""
+                if "solAmountNegotiated" not in val:
+                    val["solAmountNegotiated"] = ""
+                if "dollarAmountNegotiated" not in val:
+                    val["dollarAmountNegotiated"]
+                if "yesterday" not in val:
+                    val["yesterday"] = ""
+                if "yesterdayClose" not in val:
+                    val["yesterdayClose"] = "" 
+                if "currencySymbol" not in val:
+                    val["currencySymbol"]
 
-            str_values = str_values + "('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'),".format(val["id"],val["nemonico"],val["date"],val["open"],val["close"],val["high"],val["low"],val["average"],val["quantityNegotiated"],val["solAmountNegotiated"],val["dollarAmountNegotiated"],val["yesterday"],val["yesterdayClose"],val["currencySymbol"])
+                str_values = str_values + "('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'),".format(val["id"],val["nemonico"],val["date"],val["open"],val["close"],val["high"],val["low"],val["average"],val["quantityNegotiated"],val["solAmountNegotiated"],val["dollarAmountNegotiated"],val["yesterday"],val["yesterdayClose"],val["currencySymbol"])
+            except Exception as e:
+                print(e)
+            
         str_values = str_values[:-1]
         if len(str_values)>0:
             insert_row_stockHistory(str_values)
