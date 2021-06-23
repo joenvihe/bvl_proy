@@ -37,4 +37,24 @@ notesDelivery VARCHAR NULL
 );
 commit;
 
+
                 
+select a.companycode, a.companyname, 
+	   a.nemonico, a.sectorcode,
+       a.sectordescription, a."rpjCode", 
+	   a.website, a."esActDescription",
+	   s.coin,s.benefitvalue,s.datecut
+from 
+	public.companystock a,
+	public.stockcompanyvalue s
+where a."rpjCode" is not null and 
+	  s.codigo = a.companycode and
+	  s.benefittype = 'DE'
+order by a.sectorcode 
+
+select *
+from public.stockcompanyvalue s
+
+select *
+from public.stockhistory
+where nemonico = 'BAP' and average != '0.0'
