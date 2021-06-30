@@ -80,3 +80,9 @@ https://larepublica.pe/pf/api/v3/content/fetch/listItemSchema?query=%7B%22from%2
 - creciminto del benficio
 - PER modrado
 - ratio moderado de precio aactivos
+
+## activar mis enviroment en anaconda jupyter notebook
+
+(base)c:> conda install -c anaconda ipykernel
+(base)c:> python -m ipykernel install --user --name=envPy38
+

@@ -141,6 +141,96 @@ def insert_row_stockvalues(lst_row):
         print(e)     
 
 
+def insert_row_ratios_financieros(lst_row):
+    try:
+        
+        query = """INSERT INTO public.ratios_financieros(codigo,dRatio,year,nImporteA)
+	               VALUES {} """.format(lst_row)
+        # connect to the PostgreSQL server
+        conn = connect_postgres()
+        cur = conn.cursor()
+        cur.execute(query)
+        conn.commit()
+        
+        count = cur.rowcount
+        print(count, "Record inserted")
+        
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(e)   
+
+
+def insert_row_doc_financieros(lst_row):
+    try:
+        
+        query = """INSERT INTO public.doc_financieros(yearPeriod,period,documentName,documentOrder,documentType,path,rpjCode,eeffType,caccount,mainTitle,numberColumns,title,value1)
+	               VALUES {} """.format(lst_row)
+        # connect to the PostgreSQL server
+        conn = connect_postgres()
+        cur = conn.cursor()
+        cur.execute(query)
+        conn.commit()
+        
+        count = cur.rowcount
+        print(count, "Record inserted")
+        
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(e)   
+
+def select_ratios_financieros(codigo = ""):
+    query = """
+    SELECT year, codigo, dratio, nimportea
+	FROM public.ratios_financieros
+    WHERE codigo = '{}'
+    ORDER BY year DESC
+    LIMIT 1
+    """.format(codigo)
+
+    conn = connect_postgres()
+    cur = conn.cursor()
+    cur.execute(query) 
+
+    list_stockCode = []
+    row = cur.fetchone()
+    while row is not None:
+        #print(row)
+        list_stockCode.append(row[0])
+        row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    
+    return list_stockCode
+
+def select_doc_financieros(codigo = ""):
+    query = """
+    SELECT yearperiod, period, documentname, documentorder, documenttype, path, rpjcode, 
+           eefftype, caccount, maintitle, numbercolumns, title, value1
+	FROM public.doc_financieros
+    WHERE rpjcode = '{}'
+    ORDER BY yearperiod DESC, period DESC
+    LIMIT 1
+    """.format(codigo)
+
+    conn = connect_postgres()
+    cur = conn.cursor()
+    cur.execute(query) 
+
+    list_stockCode = []
+    row = cur.fetchone()
+    while row is not None:
+        #print(row)
+        list_stockCode.append("{}{}".format(row[0],row[1]))
+        row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    
+    return list_stockCode
+
 if __name__ == "__main__":
 
     par = sys.argv # 1 el año
@@ -189,77 +279,108 @@ if __name__ == "__main__":
             print(URL_COD.format(codigo))
             data = json.loads(r.text)
 
-            # variables generales        
+            
+            l = select_ratios_financieros(codigo)
+            if len(l)>0:
+                ratio_year = int(l[0])
+            else:
+                ratio_year = 1990
+            #print(ratio_year)
+            
+            lst_radios = []
+            # variables generales
+            str_row = ""        
             for v in data:
-                for i in v["finantialIndexYears"]:
-                    if (int(par[2])-1) == int(i["year"]):
-                        print(v["dRatio"])
-                        print(i["year"])
-                        print(i["nImporteA"])
+                for f in v["finantialIndexYears"]:
+                    if int(f["year"]) > ratio_year: 
+                        drad = {}
+                        drad["codigo"] = codigo
+                        drad["dRatio"] = v["dRatio"]
+                        drad["year"] = f["year"]
+                        drad["nImporteA"] = f["nImporteA"]
+                        lst_radios.append(drad) 
+
+                        str_row += "('{}','{}','{}','{}'),".format(codigo,v["dRatio"],f["year"],f["nImporteA"])
+
+            #print(str_row)
+            if len(str_row) > 0:
+                insert_row_ratios_financieros(str_row[:-1])
+
+            #print(lst_radios)
+            #break
 
 
             #df = pd.DataFrame.from_dict(data, orient='columns')
             #print(df)
 
+    if par[1] == "4":
+        arrV = []
+        for codigo in lst_code:
+    
             # variables detalle
             payload = {
                 "page": "1",
                 "period": "1",
-                "periodAccount": "",
+                "periodAccount": par[3], #cuatrimestre
                 "rpjCode": codigo,
                 "search": "",
                 "size": "12",
                 "type": "1",
-                "yearPeriod": par[2]
+                "yearPeriod": par[2] #año
             }
 
             r = requests.post(URL, json=payload)
             lista_values = json.loads(r.text)
+            #print(lista_values)
 
+            #break
             #df = pd.DataFrame.from_dict(lista_values, orient='columns')
             #print(r.status_code)
             #print(df)
-            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            
+            
+            l = select_doc_financieros(codigo)
+            if len(l)>0:
+                doc_year = int(l[0])
+            else:
+                doc_year = 19901
+            #print(doc_year)
+            
+
+            #print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            lst_val = []
+            str_row = ""
             for v in lista_values["content"]:
                 #print(v["document"])
                 if "document" in v:
                     #print(v["document"])
                     for i in v["document"]:
-                        print(v["yearPeriod"])
-                        print(v["period"])
-                        print(v["documentName"])
-                        print(v["documentOrder"])
-                        print(v["path"])
-                        print(v["quantityParts"])
-                        print(v["eeffType"])
-                        print(i["caccount"])
-                        print(i["mainTitle"])
-                        print(i['numberColumns'])
-                        print(i['title'])
-                        print(i['value1'])
-                        print(i['value2'])
-                        print(i['value3'])
-                        print(i['value4'])
-                        print(i['value5'])
-                        print(i['value6'])
-                        print(i['value7'])
-                        print(i['value8'])
-                        print(i['value9'])
-                        print(i['value10'])
-                        print(i['value11'])
-                        print(i['value12'])
-                        print(i['value13'])
-                        print(i['value14'])
-                        print(i['value15'])
-                        print(i['value16'])
-                        print(i['value17'])
-                        print(i['value18'])
-                        print(i['value19'])
-                        print(i['value20'])
-                        print(i['value21'])
-                        print(i['value22'])
-                        print(i['value23'])
-                        print(i['value24'])
-                        print(i['value25'])
+                        valor = int("{}{}".format(v["yearPeriod"],v["period"]))
+                        #print(valor) 
+                        if valor >doc_year:
+                            dval ={}
+                            dval["yearPeriod"] = v["yearPeriod"]
+                            dval["period"] = v["period"]  #trimestr 1,2,3,4
+                            dval["documentName"] = v["documentName"] 
+                            dval["documentOrder"] = v["documentOrder"] 
+                            dval["documentType"] = v["documentType"] 
+                            dval["path"] = v["path"] 
+                            dval["rpjCode"] = v["rpjCode"]
+                            dval["eeffType"] = v["eeffType"]   
+                            dval["caccount"] = i["caccount"]   
+                            dval["mainTitle"] = i["mainTitle"]   
+                            dval["numberColumns"] = i["numberColumns"]   
+                            dval["title"] = i["title"]   
+                            dval["value1"] = i["value1"]   
+                            lst_val.append(dval)
 
-            break
+                            str_row += "('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'),".format(v["yearPeriod"], v["period"], v["documentName"], v["documentOrder"], v["documentType"], v["path"], v["rpjCode"], v["eeffType"] , i["caccount"], i["mainTitle"] , i["numberColumns"], i["title"] , i["value1"])
+
+            #print(str_row)
+            if len(str_row) > 0:
+                insert_row_doc_financieros(str_row[:-1])
+
+
+            #df = pd.DataFrame(lst_val)
+            #df.to_csv("eeff.csv")
+            #break
