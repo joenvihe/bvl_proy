@@ -7,6 +7,32 @@ CREATE TABLE tipos_bcrp (
 );
 commit;
 
+
+
+CREATE TABLE stockistoday (
+companyCode VARCHAR NULL,
+companyName VARCHAR NULL,
+shortName VARCHAR NULL,
+nemonico VARCHAR NULL,
+sectorCode VARCHAR NULL,
+sectorDescription VARCHAR NULL,
+lastDate VARCHAR NULL,
+previousDate VARCHAR NULL,
+buy VARCHAR NULL,
+sell VARCHAR NULL,
+previous VARCHAR NULL,
+negotiatedQuantity VARCHAR NULL,
+negotiatedAmount VARCHAR NULL,
+negotiatedNationalAmount VARCHAR NULL,
+operationsNumbe VARCHAR NULL,
+currency VARCHAR NULL,
+unity VARCHAR NULL,
+segment VARCHAR NULL,
+createdDate VARCHAR NULL
+);
+commit;
+
+
 ## creacion de la tabla valor_bcrp
 CREATE TABLE valor_bcrp (
 	codigo VARCHAR NULL,
@@ -137,3 +163,37 @@ select * from ratios_financieros
 select * from doc_financieros
 
 delete from ratios_financieros where 1=1;commit;
+
+
+
+
+select count(*) from valor_bcrp
+
+select a.codigo, a.periodo , a.valor, CAST(CAST(a.fecha AS DATE) AS varchar) fecha
+from
+(
+select  codigo, periodo, valor,
+	CASE 
+	WHEN length(periodo) = 8 THEN TO_DATE(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(periodo, 'Sep', '01.09'), 'Ago', '01.08'), 'Jul', '01.07'), 'Jun', '01.06'), 'May', '01.05'), 'Abr', '01.04'), 'Mar', '01.03'), 'Feb', '01.02'), 'Ene', '01.01'), 'Dic', '01.12'), 'Nov', '01.11'), 'Oct', '01.10'), 'DD.MM.YY') + interval '1 month'
+	WHEN length(periodo) = 5 THEN TO_DATE(replace(replace(replace(replace(periodo, 'T1', '01.01'), 'T2', '01.04'), 'T3', '01.07'), 'T4', '01.10'),'DD.MM.YY') + interval '3 month'
+	ELSE TO_DATE(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(periodo, 'Set', 'September'), 'Ago', 'August'), 'Jul', 'July'), 'Jun', 'June'), 'May', 'May'), 'Abr', 'April'), 'Mar', 'March'), 'Feb', 'February'), 'Ene', 'January'), 'Dic', 'December'), 'Nov', 'November'), 'Oct', 'October'), 'dd.Month.YY')+1 
+	END AS fecha
+-- select *  --,replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(periodo, 'Sep', '01.09'), 'Ago', '01.08'), 'Jul', '01.07'), 'Jun', '01.06'), 'May', '01.05'), 'Abr', '01.04'), 'Mar', '01.03'), 'Feb', '01.02'), 'Ene', '01.01'), 'Dic', '01.12'), 'Nov', '01.11'), 'Oct', '01.10')
+from valor_bcrp 
+-- where codigo = 'PN01510BM' -- and periodo Like '%Oct%'
+-- 	where codigo = 'PD38026MD'
+where codigo = 'PD37940PQ'
+order by 4 desc
+limit 1
+) a
+
+delete  from valor_bcrp where codigo='PD37940PQ'
+delete from tipos_bcrp where codigo ='PD37940PQ'
+
+select * from doc_financieros limit 100
+
+select * from tipos_bcrp
+
+
+select distinct title
+from doc_financieros where lower(title) like '%prec%'

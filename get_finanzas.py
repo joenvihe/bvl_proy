@@ -180,6 +180,27 @@ def insert_row_doc_financieros(lst_row):
     except Exception as e:
         print(e)   
 
+def insert_row_stockistoday(lst_row):
+    try:
+        
+        query = """INSERT INTO public.stockistoday(
+	companycode, companyname, shortname, nemonico, sectorcode, sectordescription, lastdate, previousdate, buy, sell, previous, negotiatedquantity, negotiatedamount, negotiatednationalamount, operationsnumbe, currency, unity, segment, createddate)
+	VALUES {} """.format(lst_row)
+        # connect to the PostgreSQL server
+        conn = connect_postgres()
+        cur = conn.cursor()
+        cur.execute(query)
+        conn.commit()
+        
+        count = cur.rowcount
+        print(count, "Record inserted")
+        
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(e)   
+
+
 def select_ratios_financieros(codigo = ""):
     query = """
     SELECT year, codigo, dratio, nimportea
@@ -238,17 +259,54 @@ if __name__ == "__main__":
     # 1 actualizar el update del codigo
     # 2 2000 , dos variables 
 
-    
-    lst_comp = select_companyStock(1)
+    if par[1] == "0": # todo de hoy
+        URL_HOME = "https://dataondemand.bvl.com.pe/v1/stock-quote/home"
+        #Request Method: POST
+        # variables detalle
+        payload = {
+            "companyCode": "",
+            "inputCompany": "",
+            "isToday": "true",
+            "sector": ""
+        }
+
+        r = requests.post(URL_HOME, json=payload)
+        vinfo = json.loads(r.text)
+        val = ""
+        for  v in vinfo:
+            v1 = ""
+            if "sectorCode" in v:
+                v1 = v["sectorCode"]
+            v2 = ""
+            if "sectorDescription" in v:
+                v2 = v["sectorDescription"]
+            v3 = ""
+            if "buy" in v:
+                v3 = v["buy"]
+            v4 = ""
+            if "sell" in v:
+                v4 = v["sell"]
+            val += "('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'),".format(
+                v['companyCode'],v['companyName'],v['shortName'],
+                v['nemonico'],v1,v2,
+                v['lastDate'],v['previousDate'],v3,v4,
+                v['previous'],v['negotiatedQuantity'],v['negotiatedAmount'],
+                v['negotiatedNationalAmount'],v['operationsNumber'],v['currency'],
+                v['unity'],v['segment'],v['createdDate'])
+
+        if len(val)>0:
+            insert_row_stockistoday(val[:-1])
+
     if par[1] == "1":
+        lst_comp = select_companyStock(1)
         for codigo in lst_comp:
             if codigo != "XXX":
                 r = requests.get(URL_INFO.format(codigo))
                 vinfo = json.loads(r.text)
                 update_row_companyStock(vinfo["rpjCode"],vinfo["website"],vinfo["esActDescription"],codigo) 
 
-    lst_comp = select_companyStock(2)
     if par[1] == "2":
+        lst_comp = select_companyStock(2)
         for codigo in lst_comp:
             r = requests.get(URL_VALUE.format(codigo))
             vinfo = json.loads(r.text)
@@ -271,8 +329,8 @@ if __name__ == "__main__":
                 insert_row_stockvalues(val[:-1])
             #break
             
-    lst_code = select_companyStock_with_code()
     if par[1] == "3":
+        lst_code = select_companyStock_with_code()
         arrV = []
         for codigo in lst_code:
             r = requests.get(URL_COD.format(codigo))
